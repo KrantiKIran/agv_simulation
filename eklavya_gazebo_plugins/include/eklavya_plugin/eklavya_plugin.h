@@ -48,7 +48,7 @@ namespace gazebo
       std::string bl_joint_name_;
       std::string br_joint_name_;
       std::string fl_joint_name_;
-      std::string fr_joint_name_;
+      //std::string fr_joint_name_;
       std::string base_geom_name_;
 
       /// Separation between the wheels
