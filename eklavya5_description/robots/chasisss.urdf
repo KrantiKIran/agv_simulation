@@ -419,5 +419,17 @@
       </plugin>
     </sensor>
   </gazebo>
-  
+  <gazebo reference="eklavya_controller">
+    <plugin name="eklavya_diff_controller" filename="libeklavya_gazebo_plugins.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>100.0</updateRate>
+      <backLeftJoint>joint_back_left_wheel</backLeftJoint>
+      <backRightJoint>joint_back_right_wheel</backRightJoint>
+      <frontLeftJoint>joint_front_left_wheel</frontLeftJoint>
+      <frontRightJoint>joint_front_right_wheel</frontRightJoint>
+      <wheelSeparation>50<!--${base_y_size}--></wheelSeparation>
+      <wheelDiameter>50<!--${wheel_x_size}--></wheelDiameter>
+      <torque>35</torque> 
+    </plugin>
+  </gazebo>
 </robot>
