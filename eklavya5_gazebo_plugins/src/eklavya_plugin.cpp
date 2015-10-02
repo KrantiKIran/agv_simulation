@@ -37,6 +37,7 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
+#include <math.h>
 
 #include <eklavya_plugin/eklavya_plugin.h>
 
@@ -44,24 +45,25 @@
 
 using namespace gazebo;
 
-enum {BL= 0, BR=1, FL=2, FR=3};
+enum {BL= 0, BR=1, F=2};
+
+double steer_angle = 0.0;
 
 EklavyaPlugin::EklavyaPlugin()
 {
   kill_sim = false;
   this->spinner_thread_ = new boost::thread( boost::bind( &EklavyaPlugin::spin, this) );
 
-  wheel_speed_ = new float[4];
+  wheel_speed_ = new float[3];
   wheel_speed_[BL] = 0.0;
   wheel_speed_[BR] = 0.0;
-  wheel_speed_[FL] = 0.0;
-  wheel_speed_[FR] = 0.0;
-
+  wheel_speed_[F] = 0.0;
+  
   set_joints_[0] = false;
   set_joints_[1] = false;
   set_joints_[2] = false;
   set_joints_[3] = false;
-
+  
   joints_[0].reset();
   joints_[1].reset();
   joints_[2].reset();
@@ -89,28 +91,30 @@ void EklavyaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   if (_sdf->HasElement("robotNamespace"))
     this->node_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
 
+  //not sure
+  bl_joint_name_ = "LW-Chassis";//"backLeftJoint";
+  if (_sdf->HasElement("LW-Chassis")) //backLeftJoint"))
+    bl_joint_name_ = _sdf->GetElement("LW-Chassis")->Get<std::string>();//backLeftJoint")->Get<std::string>();
 
-  bl_joint_name_ = "backLeftJoint";
-  if (_sdf->HasElement("backLeftJoint"))
-    bl_joint_name_ = _sdf->GetElement("backLeftJoint")->Get<std::string>();
+  br_joint_name_ = "RW-Chassis";//backRightJoint";
+  if (_sdf->HasElement("RW-Chassis"))
+    br_joint_name_ = _sdf->GetElement("RW-Chassis")->Get<std::string>();
 
-  br_joint_name_ = "backRightJoint";
-  if (_sdf->HasElement("backRightJoint"))
-    br_joint_name_ = _sdf->GetElement("backRightJoint")->Get<std::string>();
+  fl_joint_name_ = "Steerring Wheel";//frontLeftJoint";
+  if (_sdf->HasElement("Steerring Wheel"))
+    fl_joint_name_ = _sdf->GetElement("Steerring Wheel")->Get<std::string>();
 
-  fl_joint_name_ = "frontLeftJoint";
-  if (_sdf->HasElement("frontLeftJoint"))
-    fl_joint_name_ = _sdf->GetElement("frontLeftJoint")->Get<std::string>();
-
-  fr_joint_name_ = "frontRightJoint";
+  /*fr_joint_name_ = "frontRightJoint";
   if (_sdf->HasElement("frontRightJoint"))
     fr_joint_name_ = _sdf->GetElement("frontRightJoint")->Get<std::string>();
+  */
 
-  wheel_sep_ = 0.55;
+  wheel_sep_ = 0.68;
+
   if (_sdf->HasElement("wheelSeparation"))
     wheel_sep_ = _sdf->GetElement("wheelSeparation")->Get<double>();
 
-  wheel_diam_ = 0.30;
+  wheel_diam_ = 0.405; //back wheels
   if (_sdf->HasElement("wheelDiameter"))
     wheel_diam_ = _sdf->GetElement("wheelDiameter")->Get<double>();
 
@@ -164,10 +168,10 @@ void EklavyaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   js_.velocity.push_back(0);
   js_.effort.push_back(0);
 
-  js_.name.push_back( fr_joint_name_ );
+  /*js_.name.push_back( fr_joint_name_ );
   js_.position.push_back(0);
   js_.velocity.push_back(0);
-  js_.effort.push_back(0);
+  js_.effort.push_back(0);*/
 
   prev_update_time_ = 0;
   prev_odom_time_ = 0;
@@ -177,13 +181,15 @@ void EklavyaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 
   joints_[BL] = model_->GetJoint(bl_joint_name_);
   joints_[BR] = model_->GetJoint(br_joint_name_);
-  joints_[FL] = model_->GetJoint(fl_joint_name_);
-  joints_[FR] = model_->GetJoint(fr_joint_name_);
+  joints_[F] = model_->GetJoint(fl_joint_name_);
+  joints_[3] = model_->GetJoint("Chassis-Steering");
+  //joints_[FR] = model_->GetJoint(fr_joint_name_);
 
   if (joints_[BL]) set_joints_[BL] = true;
   if (joints_[BR]) set_joints_[BR] = true;
-  if (joints_[FL]) set_joints_[FL] = true;
-  if (joints_[FR]) set_joints_[FR] = true;
+  if (joints_[F]) set_joints_[F] = true;
+  if (joints_[3]) set_joints_[3] = true;
+  //if (joints_[FR]) set_joints_[FR] = true;
 
   //initialize time and odometry position
   prev_update_time_ = last_cmd_vel_time_ = this->world_->GetSimTime();
@@ -252,13 +258,13 @@ void EklavyaPlugin::UpdateChild()
   prev_update_time_ = time_now;
 
   double wd, ws;
-  double d_bl, d_br, d_fl, d_fr;
+  double d_bl, d_br, d_f;
   double dr, da;
 
   wd = wheel_diam_;
   ws = wheel_sep_;
 
-  d_bl = d_br = d_fl = d_fr = 0;
+  d_bl = d_br = d_f = 0;
   dr = da = 0;
 
   // Distance travelled by front wheels
@@ -266,10 +272,10 @@ void EklavyaPlugin::UpdateChild()
     d_bl = step_time.Double() * (wd / 2) * joints_[BL]->GetVelocity(0);
   if (set_joints_[BR])
     d_br = step_time.Double() * (wd / 2) * joints_[BR]->GetVelocity(0);
-  if (set_joints_[FL])
-    d_fl = step_time.Double() * (wd / 2) * joints_[FL]->GetVelocity(0);
-  if (set_joints_[FR])
-    d_fr = step_time.Double() * (wd / 2) * joints_[FR]->GetVelocity(0);
+  if (set_joints_[F])
+    d_f = step_time.Double() * (wd / 2) * joints_[F]->GetVelocity(0) * cos(steer_angle); //average of cosine component
+  /*if (set_joints_[FR])
+    d_fr = step_time.Double() * (wd / 2) * joints_[FR]->GetVelocity(0);*/
 
   // Can see NaN values here, just zero them out if needed
   if (isnan(d_bl)) {
@@ -280,17 +286,20 @@ void EklavyaPlugin::UpdateChild()
     ROS_WARN_THROTTLE(0.1, "Gazebo ROS Eklavya plugin. NaN in d_br. Step time: %.2f. WD: %.2f. Velocity: %.2f", step_time.Double(), wd, joints_[BR]->GetVelocity(0));
     d_br = 0;
   }
-  if (isnan(d_fl)) {
-    ROS_WARN_THROTTLE(0.1, "Gazebo ROS Eklavya plugin. NaN in d_fl. Step time: %.2f. WD: %.2f. Velocity: %.2f", step_time.Double(), wd, joints_[FL]->GetVelocity(0));
-    d_fl = 0;
+  if (isnan(d_f)) {
+    ROS_WARN_THROTTLE(0.1, "Gazebo ROS Eklavya plugin. NaN in d_fl. Step time: %.2f. WD: %.2f. Velocity: %.2f", step_time.Double(), wd, joints_[F]->GetVelocity(0));
+    d_f = 0;
   }
+
+  /*
   if (isnan(d_fr)) {
     ROS_WARN_THROTTLE(0.1, "Gazebo ROS Eklavya plugin. NaN in d_fr. Step time: %.2f. WD: %.2f. Velocity: %.2f", step_time.Double(), wd, joints_[FR]->GetVelocity(0));
     d_fr = 0;
   }
-
-  dr = (d_bl + d_br + d_fl + d_fr) / 4;
-  da = ((d_br+d_fr)/2 - (d_bl+d_fl)/2) / ws;
+  */
+  
+  dr = (d_bl + d_br + d_f) / 3;
+  da = ((d_br)/2 - (d_bl)/2) / ws; // ??
 
   
   odom_pub_counter_++;
@@ -316,17 +325,24 @@ void EklavyaPlugin::UpdateChild()
     joints_[BR]->SetVelocity( 0, wheel_speed_[BR] / (wd / 2.0) );
     joints_[BR]->SetMaxForce( 0, torque_ );
   }
-  if (set_joints_[FL])
+  if (set_joints_[F])
   {
-    joints_[FL]->SetVelocity( 0, wheel_speed_[FL] / (wd / 2.0) );
-    joints_[FL]->SetMaxForce( 0, torque_ );
+  
+    // ??
+    this->model_->SetJointPosition("Chassis-Steering", steer_angle);//joints_[3]->SetJointPosition("Chassis-Steering", steer_angle);
+
+    joints_[F]->SetVelocity( 0, wheel_speed_[F] / (0.44 / 2.0) ); //front wheel has different diameter
+    joints_[F]->SetMaxForce( 0, torque_ );
+    
   }
+  
+  /* 
   if (set_joints_[FR])
   {
     joints_[FR]->SetVelocity( 0, wheel_speed_[FR] / (wd / 2.0) );
     joints_[FR]->SetMaxForce( 0, torque_ );
   }
-
+  */
 
 
   js_.header.stamp.sec = time_now.sec;
@@ -343,17 +359,19 @@ void EklavyaPlugin::UpdateChild()
     js_.velocity[1] = joints_[BR]->GetVelocity(0);
   }
 
-  if (this->set_joints_[FL])
+  if (this->set_joints_[F])
   {
-    js_.position[2] = joints_[FL]->GetAngle(0).Radian();
-    js_.velocity[2] = joints_[FL]->GetVelocity(0);
+    js_.position[2] = joints_[F]->GetAngle(0).Radian();
+    js_.velocity[2] = joints_[F]->GetVelocity(0);
   }
 
+  /*
   if (this->set_joints_[FR])
   {
     js_.position[3] = joints_[FR]->GetAngle(0).Radian();
     js_.velocity[3] = joints_[FR]->GetVelocity(0);
   }
+  */
 
   joint_state_pub_.publish( js_ );
 
@@ -363,8 +381,8 @@ void EklavyaPlugin::UpdateChild()
   {
     wheel_speed_[BL] = 0;
     wheel_speed_[BR] = 0;
-    wheel_speed_[FL] = 0;
-    wheel_speed_[FR] = 0;
+    wheel_speed_[F] = 0;
+    //wheel_speed_[FR] = 0;
   }
 }
 
@@ -372,14 +390,17 @@ void EklavyaPlugin::UpdateChild()
 void EklavyaPlugin::OnCmdVel( const geometry_msgs::TwistConstPtr &msg)
 {
   last_cmd_vel_time_ = this->world_->GetSimTime();
-  double vr, va;
+  double vr, va, d_frwheel_axle;
   vr = msg->linear.x;
   va = msg->angular.z;
 
+  d_frwheel_axle = 1.05;
+
   wheel_speed_[BL] = vr - va * (wheel_sep_) / 2;
   wheel_speed_[BR] = vr + va * (wheel_sep_) / 2;
-  wheel_speed_[FL] = vr - va * (wheel_sep_) / 2;
-  wheel_speed_[FR] = vr + va * (wheel_sep_) / 2;
+  steer_angle = atan(va*d_frwheel_axle/vr);
+  wheel_speed_[F] = vr/cos(steer_angle); //vr - va * (wheel_sep_) / 2;
+  //wheel_speed_[FR] = vr + va * (wheel_sep_) / 2;
 }
 
 void EklavyaPlugin::spin()

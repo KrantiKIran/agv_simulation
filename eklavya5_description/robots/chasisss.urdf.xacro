@@ -461,6 +461,57 @@ xmlns:xacro="http://ros.org/wiki/xacro"
     <gazebo reference="gps_link">
         <material>Gazebo/White</material>
     </gazebo>
-
+    <!--<transmission type="SimpleTransmission" name="FrontWheel">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="Steerring Wheel" />
+      <actuator name="Steering_wheel_joint_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+  <transmission type="SimpleTransmission" name="LeftWheel">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="LW-Chassis" />
+      <actuator name="Left_wheel_joint_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+  <transmission type="SimpleTransmission" name="RightWheel">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="RW-Chassis" />
+      <actuator name="Right_wheel_joint_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>-->
+    <!-- Controls plugin-->
+  <gazebo>
+    <plugin filename="libeklavya_gazebo_plugins.so" name="eklavya_diff_controller">
+-      <alwaysOn>true</alwaysOn>
+-      <updateRate>100.0</updateRate>
+-      <backLeftJoint>joint_back_left_wheel</backLeftJoint>
+-      <backRightJoint>joint_back_right_wheel</backRightJoint>
+-      <frontLeftJoint>joint_front_left_wheel</frontLeftJoint>
+-      <!--<frontRightJoint>joint_front_right_wheel</frontRightJoint>-->
+-      <wheelSeparation>0.5709</wheelSeparation>
+-      <wheelDiameter>0.3555</wheelDiameter>
+-      <torque>35</torque>
+-    </plugin>
+     <!--<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />-->
+  </gazebo>
+-  <!--
+-  <gazebo>
+-    <plugin filename="libgazebo_ros_p3d.so" name="eklavya_groundtruth_sim">
+-      <updateRate>100.0</updateRate>
+-      <topicName>ground_truth/odom</topicName>
+-      <gaussianNoise>0.001</gaussianNoise>
+-      <frameName>world</frameName>
+-      <alwaysOn>true</alwaysOn>
+-      <bodyName>base_footprint</bodyName>
+-      <xyzOffset>0 0 0</xyzOffset>
+-      <rpyOffset>0 0 0</rpyOffset>
+-    </plugin>
+   </gazebo>-->
   
 </robot>
