@@ -3,7 +3,6 @@
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
 #include <math.h>
-
 #include <eklavya_plugin/eklavya_plugin.h>
 
 #include <ros/time.h>
@@ -13,6 +12,7 @@ using namespace gazebo;
 enum {BL= 0, BR=1, F=2};
 
 double steer_angle = 0.0;
+double va=0.0;
 
 EklavyaPlugin::EklavyaPlugin()
 {
@@ -83,7 +83,7 @@ void EklavyaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   if (_sdf->HasElement("wheelDiameter"))
     wheel_diam_ = _sdf->GetElement("wheelDiameter")->Get<double>();
 
-  torque_ = 30.0;
+  torque_ = 700.0;
   if (_sdf->HasElement("torque"))
     torque_ = _sdf->GetElement("torque")->Get<double>();
 
@@ -114,7 +114,7 @@ void EklavyaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 
   cmd_vel_sub_ = rosnode_->subscribe("cmd_vel", 1, &EklavyaPlugin::OnCmdVel, this );
 
-  odom_pub_ = rosnode_->advertise<nav_msgs::Odometry>("odom", 1);
+  odom_pub_ = rosnode_->advertise<nav_msgs::Odometry>("odometry/filtered", 1);
 
   joint_state_pub_ = rosnode_->advertise<sensor_msgs::JointState>("joint_states", 1);
 
@@ -182,7 +182,7 @@ void EklavyaPlugin::publishOdometry(common::Time time_now) {
   odom.header.stamp.sec = time_now.sec;
   odom.header.stamp.nsec = time_now.nsec;
   odom.header.frame_id = "odom";
-  odom.child_frame_id = "base_footprint";
+  odom.child_frame_id = "base_link";
   odom.pose.pose.position.x = odom_pose_[0];
   odom.pose.pose.position.y = odom_pose_[1];
   odom.pose.pose.position.z = 0;
@@ -279,24 +279,26 @@ void EklavyaPlugin::UpdateChild()
   }
 
 
-
+/*
   if (set_joints_[BL])
   {
-    joints_[BL]->SetVelocity( 0, wheel_speed_[BL] / (wd/2.0) );
+    joints_[BL]->SetVelocity( 0, -wheel_speed_[BL]/ (wd/2.0) );
     joints_[BL]->SetMaxForce( 0, torque_ );
   }
   if (set_joints_[BR])
   {
-    joints_[BR]->SetVelocity( 0, wheel_speed_[BR] / (wd / 2.0) );
+    joints_[BR]->SetVelocity( 0, -wheel_speed_[BR]/ (wd / 2.0) );
     joints_[BR]->SetMaxForce( 0, torque_ );
   }
+  */
   if (set_joints_[F])
   {
   
     // ??
-    this->model_->SetJointPosition("Chassis-Steering", steer_angle);//joints_[3]->SetJointPosition("Chassis-Steering", steer_angle);
+    this->j2_controller = new physics::JointController(model_);
+    j2_controller->SetJointPosition("Chassis-Steering",steer_angle);//joints_[3]->SetJointPosition("Chassis-Steering", steer_angle);
 
-    joints_[F]->SetVelocity( 0, wheel_speed_[F] / (0.44 / 2.0) ); //front wheel has different diameter
+    joints_[F]->SetVelocity( 0, -wheel_speed_[F]/ (wd/2.0) ); //front wheel has different diameter
     joints_[F]->SetMaxForce( 0, torque_ );
     
   }
@@ -355,7 +357,7 @@ void EklavyaPlugin::UpdateChild()
 void EklavyaPlugin::OnCmdVel( const geometry_msgs::TwistConstPtr &msg)
 {
   last_cmd_vel_time_ = this->world_->GetSimTime();
-  double vr, va, d_frwheel_axle;
+  double vr, d_frwheel_axle;
   vr = msg->linear.x;
   va = msg->angular.z;
 
@@ -363,7 +365,7 @@ void EklavyaPlugin::OnCmdVel( const geometry_msgs::TwistConstPtr &msg)
 
   wheel_speed_[BL] = vr - va * (wheel_sep_) / 2;
   wheel_speed_[BR] = vr + va * (wheel_sep_) / 2;
-  steer_angle = atan(va*d_frwheel_axle/vr);
+  steer_angle = atan(va*d_frwheel_axle/vr)/cos(0.34906585);
   wheel_speed_[F] = vr/cos(steer_angle); //vr - va * (wheel_sep_) / 2;
   //wheel_speed_[FR] = vr + va * (wheel_sep_) / 2;
 }
