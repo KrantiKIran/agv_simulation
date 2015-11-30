@@ -110,7 +110,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
   <joint
     name="Chassis-Steering"
     type="revolute">
-    <limit lower="${-M_PI/2.0}" upper="${M_PI/2.0}" effort="5000" velocity="1300"/>
+    <limit lower="${-M_PI/2.0}" upper="${M_PI/2.0}" effort="50000" velocity="10000"/>
     <origin
       xyz="0.20345 -0.10209 0.11102"
       rpy="1.2673 0 1.0548" />
@@ -163,8 +163,8 @@ xmlns:xacro="http://ros.org/wiki/xacro"
       <surface>
         <friction>
           <ode>
-            <mu>0.2</mu>
-            <mu2>0.1</mu2>
+            <mu>0.5</mu>
+            <mu2>0.25</mu2>
           </ode>
         </friction>
         <contact>
@@ -228,8 +228,8 @@ xmlns:xacro="http://ros.org/wiki/xacro"
       <surface>
         <friction>
           <ode>
-            <mu>0.2</mu>
-            <mu2>0.1</mu2>
+            <mu>0.5</mu>
+            <mu2>0.25</mu2>
           </ode>
         </friction>
         <contact>
@@ -294,8 +294,8 @@ xmlns:xacro="http://ros.org/wiki/xacro"
       <surface>
         <friction>
           <ode>
-            <mu>0.2</mu>
-            <mu2>0.1</mu2>
+            <mu>0.5</mu>
+            <mu2>0.25</mu2>
           </ode>
         </friction>
         <contact>

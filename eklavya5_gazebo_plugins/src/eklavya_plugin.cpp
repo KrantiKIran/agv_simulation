@@ -83,7 +83,7 @@ void EklavyaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   if (_sdf->HasElement("wheelDiameter"))
     wheel_diam_ = _sdf->GetElement("wheelDiameter")->Get<double>();
 
-  torque_ = 700.0;
+  torque_ = 7000.0;
   if (_sdf->HasElement("torque"))
     torque_ = _sdf->GetElement("torque")->Get<double>();
 
@@ -232,7 +232,7 @@ void EklavyaPlugin::UpdateChild()
   d_bl = d_br = d_f = 0;
   dr = da = 0;
 
-  // Distance travelled by front wheels
+  // Distance travelled by back wheels
   if (set_joints_[BL])
     d_bl = step_time.Double() * (wd / 2) * joints_[BL]->GetVelocity(0);
   if (set_joints_[BR])
@@ -263,7 +263,7 @@ void EklavyaPlugin::UpdateChild()
   }
   */
   
-  dr = (d_bl + d_br + d_f) / 3;
+  dr = (d_bl + d_br)/2.0; //+ d_f) / 3;
   da = ((d_br)/2 - (d_bl)/2) / ws; // ??
 
   
