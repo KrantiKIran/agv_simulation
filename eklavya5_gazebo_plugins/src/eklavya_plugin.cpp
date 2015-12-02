@@ -83,7 +83,7 @@ void EklavyaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   if (_sdf->HasElement("wheelDiameter"))
     wheel_diam_ = _sdf->GetElement("wheelDiameter")->Get<double>();
 
-  torque_ = 7000.0;
+  torque_ = 10000.0;
   if (_sdf->HasElement("torque"))
     torque_ = _sdf->GetElement("torque")->Get<double>();
 
@@ -268,8 +268,8 @@ void EklavyaPlugin::UpdateChild()
 
   
   odom_pub_counter_++;
-  odom_dr_ += dr;
-  odom_da_ += da;
+  odom_dr_ += (-dr);
+  odom_da_ += (-da);
   double reqd_period = 0.04;
   if (odom_pub_counter_ >= reqd_period/step_time.Double()) {
      publishOdometry(time_now);
