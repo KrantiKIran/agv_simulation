@@ -110,8 +110,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
   <joint
     name="Chassis-Steering"
     type="revolute">
-    <dynamics damping="50.0" friction="50.0"/>
-    <limit effort="1000.0" lower="-1.57" upper="1.57" velocity="6"/>
+    <limit lower="${-M_PI/2.0}" upper="${M_PI/2.0}" effort="50000" velocity="10000"/>
     <origin
       xyz="0.20345 -0.10209 0.11102"
       rpy="1.2673 0 1.0548" />
@@ -121,9 +120,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
       link="Steering" />
     <axis
       xyz="0 0 -1" />
-    <limit
-      effort="0"
-      velocity="0" />
+  
   </joint>
   <link
     name="Front Wheel">
@@ -163,12 +160,22 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         <mesh
           filename="package://eklavya5_description/meshes/Front Wheel.STL" />
       </geometry>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.2</mu>
+            <mu2>0.1</mu2>
+          </ode>
+        </friction>
+        <contact>
+          <ode/>
+        </contact>
+     </surface>
     </collision>
   </link>
   <joint
     name="Steerring Wheel"
-    type="revolute">
-    <limit effort="1000.0" lower="0.0" upper="6.28" velocity="6"/>
+    type="continuous">
     <origin
       xyz="0.086603 0.038 0.087837"
       rpy="1.5708 0 3.1416" />
@@ -178,9 +185,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
       link="Front Wheel" />
     <axis
       xyz="0 0 -1" />
-    <limit
-      effort="0"
-      velocity="0" />
+    
   </joint>
   <link
     name="Left Wheel">
@@ -220,12 +225,23 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         <mesh
           filename="package://eklavya5_description/meshes/Left Wheel.STL" />
       </geometry>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.2</mu>
+            <mu2>0.1</mu2>
+          </ode>
+        </friction>
+        <contact>
+          <ode/>
+        </contact>
+     </surface>      
+     
     </collision>
   </link>
   <joint
     name="LW-Chassis"
-    type="revolute">
-    <limit effort="1000.0" lower="0.0" upper="6.28" velocity="0.5"/>
+    type="continuous">
     <origin
       xyz="0.23345 -0.80043 0.41447"
       rpy="1.4533 -0.25456 0.43831" />
@@ -235,9 +251,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
       link="Left Wheel" />
     <axis
       xyz="0 -1 0" />
-    <limit
-      effort="0"
-      velocity="0" />
+    
   </joint>
   <link
     name="Right Wheel">
@@ -277,12 +291,22 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         <mesh
           filename="package://eklavya5_description/meshes/Right Wheel.STL" />
       </geometry>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.2</mu>
+            <mu2>0.1</mu2>
+          </ode>
+        </friction>
+        <contact>
+          <ode/>
+        </contact>
+     </surface>
     </collision>
   </link>
   <joint
     name="RW-Chassis"
-    type="revolute">
-    <limit effort="1000.0" lower="0.0" upper="6.28" velocity="0.5"/>
+    type="continuous">
     <origin
       xyz="0.384 -0.80043 -0.10941"
       rpy="-3.0808 -0.27332 -0.22183" />
@@ -292,9 +316,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
       link="Right Wheel" />
     <axis
       xyz="0 0 1" />
-    <limit
-      effort="0"
-      velocity="0" />
+   
   </joint>
 
   <joint name="camera_joint" type="fixed">
@@ -415,7 +437,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         </scan>
         <range>
           <min>0.1</min>
-          <max>4.0</max>
+          <max>40.0</max>
           <resolution>0.01</resolution>
         </range>
         <noise>
@@ -439,7 +461,9 @@ xmlns:xacro="http://ros.org/wiki/xacro"
 
 <!-- IMU-->
 
-    <sensor_imu parent="base_link" name="imu" colour="Blue" imu_px="-1" imu_py="0.0" imu_pz="0.8" imu_or="0.0" imu_op="${-M_PI/2.0}" imu_oy="0.0" />
+    <sensor_imu parent="base_link" name="imu" colour="Blue" imu_px="-1" imu_py="0.0" imu_pz="0.8" imu_or="0.0" imu_op="${-M_PI/2.0}" imu_oy="0.0">
+      
+    </sensor_imu>
 
     <gazebo reference="imu_link">
         <material>Gazebo/Blue</material>
@@ -458,7 +482,9 @@ xmlns:xacro="http://ros.org/wiki/xacro"
           gps_op="0.0" 
           gps_oy="${M_PI}" 
           dimX="0.16" dimY="0.16" dimZ="0.14"
-          />
+          >
+      
+    </sensor_gps>
     <gazebo reference="gps_link">
         <material>Gazebo/White</material>
     </gazebo>
