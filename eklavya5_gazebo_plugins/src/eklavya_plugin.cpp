@@ -357,17 +357,46 @@ void EklavyaPlugin::UpdateChild()
 void EklavyaPlugin::OnCmdVel( const geometry_msgs::TwistConstPtr &msg)
 {
   last_cmd_vel_time_ = this->world_->GetSimTime();
-  double vr, d_frwheel_axle;
+  double vr, d_frwheel_axle, temp_angle;
   vr = msg->linear.x;
   va = msg->angular.z;
-
   d_frwheel_axle = 1.05;
-
+  
+  /*  
   wheel_speed_[BL] = vr - va * (wheel_sep_) / 2;
   wheel_speed_[BR] = vr + va * (wheel_sep_) / 2;
   steer_angle = atan(va*d_frwheel_axle/vr)/cos(0.34906585);
+  wheel_speed_[F] = vr/cos(steer_angle);
+  */
+  //wheel_speed_[BL] = vr - va * (wheel_sep_) / 2;
+  //wheel_speed_[BR] = vr + va * (wheel_sep_) / 2;
+  //steer_angle = 0;
+  
+  if(vr < 0.0001 && vr>-0.0001 && va>0)
+  {
+    steer_angle =-atan(INFINITY)/cos(0.34906585);
+    //wheel_speed_[F] = 1.0;//vr/cos(steer_angle); //vr - va * (wheel_sep_) / 2;
+    //wheel_speed_[BL] = 1.0;
+    //wheel_speed_[BR] = 1.0;
+  }
+  else if(vr < 0.0001 && vr>-0.0001 && va<0)
+  {
+    steer_angle = atan(INFINITY)/cos(0.34906585);
+    //wheel_speed_[F] = 1.0;//vr/cos(steer_angle); //vr - va * (wheel_sep_) / 2;
+    //wheel_speed_[BL] = 1.0;
+    //wheel_speed_[BR] = 1.0;
+  }
+  else
+  { 
+    steer_angle = atan(va*d_frwheel_axle/vr)/cos(0.34906585);
+    
+  }
+  wheel_speed_[BL] = vr - va * (wheel_sep_) / 2;
+  wheel_speed_[BR] = vr + va * (wheel_sep_) / 2;
   wheel_speed_[F] = vr/cos(steer_angle); //vr - va * (wheel_sep_) / 2;
-  //wheel_speed_[FR] = vr + va * (wheel_sep_) / 2;
+  
+  
+  //wheel_speed_[FR] = vr + va * (wheel_sep_) / 2;*/
 }
 
 void EklavyaPlugin::spin()
