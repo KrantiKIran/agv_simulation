@@ -23,14 +23,14 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         xyz="0.51815 0.2035 0.46592" 
         rpy="0 0 0" />
       <mass
-        value="1.3372" />
+        value="1.60779" />
       <inertia
-        ixx="0.11623"
-        ixy="-0.003745"
-        ixz="-0.038661"
-        iyy="0.10504"
-        iyz="-0.010842"
-        izz="0.086997" />
+        ixx="0.100657"
+        ixy="0.000429"
+        ixz="-0.012951"
+        iyy="0.062637"
+        iyz="-0.000032"
+        izz="0.126211" />
     </inertial>
     <visual>
       <origin
@@ -74,14 +74,14 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         xyz="0.074275 -0.0014324 0.24555"
         rpy="0 0 0" />
       <mass
-        value="0.50841" />
+        value="5.15679" />
       <inertia
-        ixx="0.012612"
-        ixy="-8.93E-06"
-        ixz="-0.00091193"
-        iyy="0.0089584"
-        iyz="0.00011487"
-        izz="0.0042882" />
+        ixx="0.030405"
+        ixy="0.00"
+        ixz="-0.014212"
+        iyy="0.037062"
+        iyz="0.00"
+        izz="0.015136" />
     </inertial>
     <visual>
       <origin
@@ -110,19 +110,17 @@ xmlns:xacro="http://ros.org/wiki/xacro"
   <joint
     name="Chassis-Steering"
     type="revolute">
-    <limit effort="1000.0" lower="0.0" upper="6.28" velocity="0.5"/>
+    <limit lower="${-M_PI/2.0}" upper="${M_PI/2.0}" effort="50000" velocity="10000"/>
     <origin
       xyz="0.20345 -0.10209 0.11102"
-      rpy="1.2673 0.51864 1.0548" />
+      rpy="1.2673 0 1.0548" />
     <parent
       link="Chassis" />
     <child
       link="Steering" />
     <axis
       xyz="0 0 -1" />
-    <limit
-      effort="0"
-      velocity="0" />
+  
   </joint>
   <link
     name="Front Wheel">
@@ -131,14 +129,14 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         xyz="8.9869E-09 -1.0254E-08 -0.037497"
         rpy="0 0 0" />
       <mass
-        value="7.4055" />
+        value="7.11231" />
       <inertia
-        ixx="0.096133"
-        ixy="3.1994E-09"
-        ixz="9.2164E-10"
-        iyy="0.096133"
-        iyz="-1.1006E-09"
-        izz="0.18557" />
+        ixx="0.084989"
+        ixy="0.00"
+        ixz="0.00"
+        iyy="0.163706"
+        iyz="0.00"
+        izz="0.084989" />
     </inertial>
     <visual>
       <origin
@@ -162,24 +160,32 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         <mesh
           filename="package://eklavya5_description/meshes/Front Wheel.STL" />
       </geometry>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.5</mu>
+            <mu2>0.25</mu2>
+          </ode>
+        </friction>
+        <contact>
+          <ode/>
+        </contact>
+     </surface>
     </collision>
   </link>
   <joint
     name="Steerring Wheel"
-    type="revolute">
-    <limit effort="1000.0" lower="0.0" upper="0.548" velocity="0.5"/>
+    type="continuous">
     <origin
       xyz="0.086603 0.038 0.087837"
-      rpy="1.5708 0.78607 3.1416" />
+      rpy="1.5708 0 3.1416" />
     <parent
       link="Steering" />
     <child
       link="Front Wheel" />
     <axis
       xyz="0 0 -1" />
-    <limit
-      effort="0"
-      velocity="0" />
+    
   </joint>
   <link
     name="Left Wheel">
@@ -188,14 +194,14 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         xyz="4.0523E-15 0.057678 2.2204E-16"
         rpy="0 0 0" />
       <mass
-        value="6.735" />
+        value="6.50284" />
       <inertia
-        ixx="0.094856"
-        ixy="-4.3279E-17"
-        ixz="1.0408E-17"
-        iyy="0.18261"
-        iyz="-8.5267E-17"
-        izz="0.094856" />
+        ixx="0.084208"
+        ixy="0.00"
+        ixz="0.00"
+        iyy="0.161025"
+        iyz="0.00"
+        izz="0.084208" />
     </inertial>
     <visual>
       <origin
@@ -219,12 +225,23 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         <mesh
           filename="package://eklavya5_description/meshes/Left Wheel.STL" />
       </geometry>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.5</mu>
+            <mu2>0.25</mu2>
+          </ode>
+        </friction>
+        <contact>
+          <ode/>
+        </contact>
+     </surface>      
+     
     </collision>
   </link>
   <joint
     name="LW-Chassis"
-    type="revolute">
-    <limit effort="1000.0" lower="0.0" upper="6.28" velocity="0.5"/>
+    type="continuous">
     <origin
       xyz="0.23345 -0.80043 0.41447"
       rpy="1.4533 -0.25456 0.43831" />
@@ -234,9 +251,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
       link="Left Wheel" />
     <axis
       xyz="0 -1 0" />
-    <limit
-      effort="0"
-      velocity="0" />
+    
   </joint>
   <link
     name="Right Wheel">
@@ -245,14 +260,14 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         xyz="-1.0103E-14 1.8874E-15 0.073368"
         rpy="0 0 0" />
       <mass
-        value="6.735" />
+        value="6.50284" />
       <inertia
-        ixx="0.094856"
-        ixy="-5.2042E-18"
-        ixz="-4.9061E-17"
-        iyy="0.094856"
-        iyz="1.6034E-17"
-        izz="0.18261" />
+        ixx="0.084208"
+        ixy="0.00"
+        ixz="0.00"
+        iyy="0.161025"
+        iyz="0.00"
+        izz="0.084208" />
     </inertial>
     <visual>
       <origin
@@ -276,12 +291,22 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         <mesh
           filename="package://eklavya5_description/meshes/Right Wheel.STL" />
       </geometry>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.5</mu>
+            <mu2>0.25</mu2>
+          </ode>
+        </friction>
+        <contact>
+          <ode/>
+        </contact>
+     </surface>
     </collision>
   </link>
   <joint
     name="RW-Chassis"
-    type="revolute">
-    <limit effort="1000.0" lower="0.0" upper="6.28" velocity="0.5"/>
+    type="continuous">
     <origin
       xyz="0.384 -0.80043 -0.10941"
       rpy="-3.0808 -0.27332 -0.22183" />
@@ -291,9 +316,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
       link="Right Wheel" />
     <axis
       xyz="0 0 1" />
-    <limit
-      effort="0"
-      velocity="0" />
+   
   </joint>
 
   <joint name="camera_joint" type="fixed">
@@ -414,7 +437,7 @@ xmlns:xacro="http://ros.org/wiki/xacro"
         </scan>
         <range>
           <min>0.1</min>
-          <max>4.0</max>
+          <max>40.0</max>
           <resolution>0.01</resolution>
         </range>
         <noise>
@@ -438,7 +461,9 @@ xmlns:xacro="http://ros.org/wiki/xacro"
 
 <!-- IMU-->
 
-    <sensor_imu parent="base_link" name="imu" colour="Blue" imu_px="-1" imu_py="0.0" imu_pz="0.8" imu_or="0.0" imu_op="${-M_PI/2.0}" imu_oy="0.0" />
+    <sensor_imu parent="base_link" name="imu" colour="Blue" imu_px="-1" imu_py="0.0" imu_pz="0.8" imu_or="0.0" imu_op="${-M_PI/2.0}" imu_oy="0.0">
+      
+    </sensor_imu>
 
     <gazebo reference="imu_link">
         <material>Gazebo/Blue</material>
@@ -457,10 +482,63 @@ xmlns:xacro="http://ros.org/wiki/xacro"
           gps_op="0.0" 
           gps_oy="${M_PI}" 
           dimX="0.16" dimY="0.16" dimZ="0.14"
-          />
+          >
+      
+    </sensor_gps>
     <gazebo reference="gps_link">
         <material>Gazebo/White</material>
     </gazebo>
-
+    <!--<transmission type="SimpleTransmission" name="FrontWheel">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="Steerring Wheel" />
+      <actuator name="Steering_wheel_joint_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+  <transmission type="SimpleTransmission" name="LeftWheel">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="LW-Chassis" />
+      <actuator name="Left_wheel_joint_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+  <transmission type="SimpleTransmission" name="RightWheel">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="RW-Chassis" />
+      <actuator name="Right_wheel_joint_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>-->
+    <!-- Controls plugin-->
+  <gazebo>
+    <plugin filename="libeklavya_gazebo_plugins.so" name="eklavya_diff_controller">
+-      <alwaysOn>true</alwaysOn>
+-      <updateRate>100.0</updateRate>
+-      <backLeftJoint>joint_back_left_wheel</backLeftJoint>
+-      <backRightJoint>joint_back_right_wheel</backRightJoint>
+-      <frontLeftJoint>joint_front_left_wheel</frontLeftJoint>
+-      <!--<frontRightJoint>joint_front_right_wheel</frontRightJoint>-->
+-      <wheelSeparation>0.5709</wheelSeparation>
+-      <wheelDiameter>0.3555</wheelDiameter>
+-      <torque>35</torque>
+-    </plugin>
+     <!--<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />-->
+  </gazebo>
+-  <!--
+-  <gazebo>
+-    <plugin filename="libgazebo_ros_p3d.so" name="eklavya_groundtruth_sim">
+-      <updateRate>100.0</updateRate>
+-      <topicName>ground_truth/odom</topicName>
+-      <gaussianNoise>0.001</gaussianNoise>
+-      <frameName>world</frameName>
+-      <alwaysOn>true</alwaysOn>
+-      <bodyName>base_footprint</bodyName>
+-      <xyzOffset>0 0 0</xyzOffset>
+-      <rpyOffset>0 0 0</rpyOffset>
+-    </plugin>
+   </gazebo>-->
   
 </robot>

@@ -3,7 +3,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="eklavya_sim_imusensor" params="name">
     <gazebo>
-      <plugin name="gazebo_ros_${name}_controller" filename="libgazebo_ros_imu.so">
+      <plugin name="gazebo_ros_${name}_controller" filename="libhector_gazebo_ros_imu.so">
         <always_on>true</always_on>
         <update_rate>100.0</update_rate>
         <bodyName>${name}_link</bodyName>
@@ -11,12 +11,12 @@
         <serviceName>${name}_service</serviceName>
         <rpyOffset>0 0 0</rpyOffset> 
         <gaussianNoise>0</gaussianNoise>
-        <accelDrift>0.5 0.5 0.5</accelDrift>           
-        <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
-        <rateDrift>0.1 0.1 0.1</rateDrift>
-        <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
-        <headingDrift>0.1</headingDrift>
-        <headingGaussianNoise>0.05</headingGaussianNoise>
+        <accelDrift>0 0 0</accelDrift>           
+        <accelGaussianNoise>0 0 0</accelGaussianNoise>
+        <rateDrift>0 0 0</rateDrift>
+        <rateGaussianNoise>0 0 0</rateGaussianNoise>
+        <headingDrift>0</headingDrift>
+        <headingGaussianNoise>0</headingGaussianNoise>
       </plugin>  
     </gazebo>
   </xacro:macro>
