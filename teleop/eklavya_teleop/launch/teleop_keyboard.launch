@@ -14,5 +14,9 @@
       <remap from="cmd_vel" to="$(arg cmd_topic)" />
     </node>
   <!-- </group> -->
+<<<<<<< HEAD
 </launch>
 
+=======
+</launch>
+>>>>>>> b485ce62910b76e37dd27cf2a592249782b751cd
